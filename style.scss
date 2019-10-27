@@ -1,0 +1,69 @@
+@import 'fonts.scss';
+
+$bg: #1a0952;
+
+* {
+  box-sizing: border-box;
+  font-family: 'Fira Sans', sans-serif;
+}
+.form {
+  background: $bg;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  font-size: 28px;
+  font-weight: normal;
+  padding: 10px;
+  text-align: left;
+  width: 1920px * 1 / 3;
+
+  .group {
+    display: flex;
+    flex-direction: column;
+  }
+  .rowgroup {
+    display: flex;
+    flex-direction: row;
+
+    .subgroup {
+      flex-grow: 1;
+      flex-basis: 0;
+      @extend .group;
+    }
+  }
+
+  .label {
+    padding: 10px;
+    padding-bottom: 0;
+  }
+  .textbox {
+    background: rgba(255,255,255,0.2);
+    padding: 5px;
+    margin: 5px;
+    border-radius: 5px;
+    font-weight: 600;
+  }
+  .radio-group {
+    display: flex;
+    flex-direction: row;
+    .radio {
+      margin: 5px;
+      margin-right: 1em;
+      &::before {
+        margin-right: 2.5px;
+        content: ' ';
+        box-sizing: border-box;
+        width: 0.8em;
+        height: 0.8em;
+        background: rgba(255,255,255,0.3);
+        border-radius: 50%;
+        display: inline-block;
+        vertical-align: baseline;
+      }
+      &.enabled::before {
+        background: rgba(255,255,255,0.1);
+        border: 0.2em solid rgba(255,255,255,0.2);
+      }
+    }
+  }
+}

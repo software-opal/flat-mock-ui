@@ -1,0 +1,28 @@
+{
+  "name": "flat-ui-mock",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "build": "node index.js",
+    "watch": "nodemon -e js,pug,scss --watch . --watch ./views ./index.js"
+  },
+  "author": "Opal Symes <code@opal.codes>",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "canvas": "^2.6.0",
+    "canvas2svg": "^1.0.16",
+    "html2canvas": "^1.0.0-rc.5",
+    "jsdom": "^15.2.0",
+    "node-sass": "^4.12.0",
+    "pug": "^2.0.4"
+  },
+  "devDependencies": {
+    "eslint": "^6.1.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "nodemon": "^1.19.4"
+  }
+}
