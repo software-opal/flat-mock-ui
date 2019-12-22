@@ -1,12 +1,13 @@
 @import 'fonts.scss';
 
-$bg: #1a0952;
+$bg: #2a3990;
+
 
 * {
   box-sizing: border-box;
   font-family: 'Fira Sans', sans-serif;
 }
-.form {
+.form, .email {
   background: $bg;
   color: white;
   display: flex;
@@ -17,6 +18,16 @@ $bg: #1a0952;
   text-align: left;
   width: 1920px * 1 / 3;
 
+  hr {
+    width: 100%;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: $bg;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+.form {
   .group {
     display: flex;
     flex-direction: column;
@@ -31,6 +42,22 @@ $bg: #1a0952;
       @extend .group;
     }
   }
+  .help {
+    font-size: 60%;
+    padding: 5px 10px;
+    &::before {
+      content: "i";
+      border: 2px solid white;
+      border-radius: 50%;
+      width: 1em;
+      height: 1em;
+      display: inline-block;
+      text-align: center;
+      margin-right: 10px;
+      background: rgba(255,255,255,0);
+      font-weight: 900;
+    }
+  }
 
   .label {
     padding: 10px;
@@ -42,6 +69,9 @@ $bg: #1a0952;
     margin: 5px;
     border-radius: 5px;
     font-weight: 600;
+    &.invalid {
+      border: solid red 2px;
+    }
   }
   .radio-group {
     display: flex;
@@ -63,6 +93,25 @@ $bg: #1a0952;
       &.enabled::before {
         background: rgba(255,255,255,0.1);
         border: 0.2em solid rgba(255,255,255,0.2);
+      }
+    }
+  }
+}
+
+.email {
+  .line {
+    display: flex;
+    flex-direction: row;
+    min-height: 10px;
+    padding-bottom: 5px;
+
+    .filled {
+      display: inline-block;
+      border-bottom: 2px solid rgba(255,255,255,0.2);
+      border-radius: 5px;
+      font-weight: 600;
+      &::before {
+        content: ' ';
       }
     }
   }
