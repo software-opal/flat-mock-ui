@@ -112,8 +112,7 @@ function script() {
       Promise.all(
         Array
           .from(table.getElementsByTagName('tr'))
-          .map((e) => {
-          }),
+          .map((e) => renderOne(e)),
       ).then(() => {
         const e = document.createElement('span');
         e.innerText = 'All done!';
@@ -145,8 +144,17 @@ function script() {
     }
     return Promise.resolve(null);
   }
+  function downloadAll() {
+    ((table) => {
+      Array
+        .from(table.getElementsByTagName('a'))
+        .filter((e) => !!e.download && !!e.href)
+        .map((e) => e.click())
+    })(document.getElementById('forms'));
+  }
   window.renderAll = renderAll;
   window.renderOne = renderOne;
+  window.downloadAll = downloadAll;
 }
 
 function getScript() {
@@ -199,6 +207,7 @@ async function render({ input, output, style }) {
     </style>
   </head>
   <button onclick="renderAll()">Generate</button>
+  <button onclick="downloadAll()">Download</button>
   <table id="forms" style="min-width: 100%">
     <tbody>
       ${tableRows}
