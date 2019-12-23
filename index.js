@@ -51,11 +51,14 @@ function script() {
   function renderElement(e) {
     console.log(e);
     const scale = 4;
-    const padding = 20;
+    // html2canvas seems to offset
+    const padding = 248 / 4 + 10;
+    const elmWidth = e.offsetWidth;
+    const elmHeight = e.offsetHeight;
     return html2canvas(e, {
       scale,
-      width: e.offsetWidth + (padding),
-      height: e.offsetHeight + (padding),
+      width: elmWidth + (padding),
+      height: elmHeight + (padding),
       backgroundColor: 'rgba(0,0,0,0)',
     }).then((canvas) => {
       const { width, height } = canvas;
@@ -63,51 +66,67 @@ function script() {
 
       const imageBox = {};
 
-      let {data} = ctx.getImageData(0, height / 2, width, 1);
+      let { data } = ctx.getImageData(0, height / 2, width, 1);
       for (let i = 0; i < width / 2; i += 1) {
-        const [r,g,b,a] = [data[(i * 4) + 0],data[(i * 4) + 3],data[(i * 4) + 3],data[(i * 4) + 3]];
+        const [r, g, b, a] = [data[(i * 4) + 0], data[(i * 4) + 3], data[(i * 4) + 3], data[(i * 4) + 3]];
         if (!(r === 0 && g === 0 && b === 0 && a === 0)) {
           imageBox.left = i;
           break;
         }
       }
       if (imageBox.left === undefined) {
-        throw new Error("Failed to render canvas")
+        throw new Error('Failed to render canvas');
       }
-      for (let i = width; i > width /2; i -= 1) {
-        const [r,g,b,a] = [data[(i * 4) + 0],data[(i * 4) + 3],data[(i * 4) + 3],data[(i * 4) + 3]];
+      for (let i = width - 1; i > width / 2; i -= 1) {
+        const [r, g, b, a] = [data[(i * 4) + 0], data[(i * 4) + 3], data[(i * 4) + 3], data[(i * 4) + 3]];
         if (!(r === 0 && g === 0 && b === 0 && a === 0)) {
           imageBox.right = i;
           break;
         }
       }
       if (imageBox.right === undefined) {
-        throw new Error("Failed to render canvas")
+        throw new Error('Failed to render canvas');
       }
       data = ctx.getImageData(width / 2, 0, 1, height).data;
       for (let i = 0; i < height / 2; i += 1) {
-        const [r,g,b,a] = [data[(i * 4) + 0],data[(i * 4) + 3],data[(i * 4) + 3],data[(i * 4) + 3]];
+        const [r, g, b, a] = [data[(i * 4) + 0], data[(i * 4) + 3], data[(i * 4) + 3], data[(i * 4) + 3]];
         if (!(r === 0 && g === 0 && b === 0 && a === 0)) {
           imageBox.top = i;
           break;
         }
       }
       if (imageBox.top === undefined) {
-        throw new Error("Failed to render canvas")
+        throw new Error('Failed to render canvas');
       }
-      for (let i = height; i > height / 2; i -= 1) {
-        const [r,g,b,a] = [data[(i * 4) + 0],data[(i * 4) + 3],data[(i * 4) + 3],data[(i * 4) + 3]];
+      for (let i = height - 1; i > height / 2; i -= 1) {
+        const [r, g, b, a] = [data[(i * 4) + 0], data[(i * 4) + 3], data[(i * 4) + 3], data[(i * 4) + 3]];
         if (!(r === 0 && g === 0 && b === 0 && a === 0)) {
           imageBox.bottom = i;
           break;
         }
       }
       if (imageBox.bottom === undefined) {
-        throw new Error("Failed to render canvas")
+        throw new Error('Failed to render canvas');
       }
-
       const newWidth = (imageBox.right - imageBox.left) + 1;
       const newHeight = (imageBox.bottom - imageBox.top) + 1;
+      if (!(newWidth === (elmWidth * scale) && newHeight === (elmHeight * scale))) {
+        const lines = [];
+        if (imageBox.left == 0) {
+          lines.push('Possible loss of image data(left)');
+        }
+        if (imageBox.right == width - 1) {
+          lines.push('Possible loss of image data(right)');
+        }
+        if (imageBox.top == 0) {
+          lines.push('Possible loss of image data(top)');
+        }
+        if (imageBox.bottom == height - 1) {
+          lines.push('Possible loss of image data(bottom)');
+        }
+        throw new Error(`Generated image was the wrong size: ${lines.join('\n')}`);
+      }
+
       const imageData = ctx.getImageData(imageBox.left, imageBox.top, newWidth, newHeight);
       canvas.width = newWidth;
       canvas.height = newHeight;
@@ -164,7 +183,7 @@ function script() {
       Array
         .from(table.getElementsByTagName('a'))
         .filter((e) => !!e.download && !!e.href)
-        .map((e) => e.click())
+        .map((e) => e.click());
     })(document.getElementById('forms'));
   }
   window.renderAll = renderAll;
@@ -194,7 +213,7 @@ async function render({ input, output, style }) {
   const tableRows = entries.map(([filename, data], i) => {
     filename = filename.replace(/\\/g, '/');
     const name = filename.replace(/\\\//g, '_').replace('.pug', '').replace(/[^-_a-zA-Z0-9]/g, '_');
-    const id = `${i}__${name}`
+    const id = `${i}__${name}`;
     return `
       <tr id="row__${id}">
         <td>
@@ -246,8 +265,16 @@ async function render({ input, output, style }) {
   await fs.writeFile(output, outputHtml);
 }
 
-render({
-  input: 'views',
-  output: 'renders.html',
-  style: 'style.scss',
-}).catch((e) => console.error(e));
+
+Promise.all([
+  Promise.all(['newsletter', 'sub', 'wgea'].map((input) => render({
+    input: `views/${input}`,
+    output: `renders-${input}.html`,
+    style: 'style.scss',
+  }))),
+  render({
+    input: 'views',
+    output: 'renders.html',
+    style: 'style.scss',
+  }),
+]).catch((e) => console.error(e));

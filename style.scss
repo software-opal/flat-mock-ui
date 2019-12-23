@@ -32,6 +32,7 @@ $bg: #2a3990;
   .group {
     display: flex;
     flex-direction: column;
+    margin-bottom: 5px;
   }
   .rowgroup {
     display: flex;
@@ -41,6 +42,10 @@ $bg: #2a3990;
       flex-grow: 1;
       flex-basis: 0;
       @extend .group;
+      margin-left: 5px;
+      &:first {
+        margin-left: 0;
+      }
     }
   }
   .help {
@@ -61,13 +66,14 @@ $bg: #2a3990;
   }
 
   .label {
-    padding: 10px;
+    padding: 0px;
     padding-bottom: 0;
   }
   .textbox {
     background: rgba(255,255,255,0.2);
     padding: 5px;
     margin: 5px;
+    margin-left: 10px;
     border-radius: 5px;
     font-weight: 600;
     &.invalid {
@@ -77,9 +83,16 @@ $bg: #2a3990;
   .radio-group {
     display: flex;
     flex-direction: row;
+    margin-left: 5px;
+    margin-bottom: 5px;
+    &.radio-vertical {
+      flex-direction: column;
+    }
+
     .radio {
       margin: 5px;
       margin-right: 1em;
+      margin-bottom: 0;
       &::before {
         margin-right: 2.5px;
         content: ' ';
