@@ -51,10 +51,11 @@ function script() {
   function renderElement(e) {
     console.log(e);
     const scale = 4;
+    const padding = 20;
     return html2canvas(e, {
       scale,
-      width: e.offsetWidth + 20,
-      height: e.offsetHeight + 20,
+      width: e.offsetWidth + (padding),
+      height: e.offsetHeight + (padding),
       backgroundColor: 'rgba(0,0,0,0)',
     }).then((canvas) => {
       const { width, height } = canvas;
@@ -62,33 +63,47 @@ function script() {
 
       const imageBox = {};
 
-      for (let i = 0; i < width; i += 1) {
-        const [r, g, b, a] = ctx.getImageData(i, height / 2, 1, 1).data;
+      let {data} = ctx.getImageData(0, height / 2, width, 1);
+      for (let i = 0; i < width / 2; i += 1) {
+        const [r,g,b,a] = [data[(i * 4) + 0],data[(i * 4) + 3],data[(i * 4) + 3],data[(i * 4) + 3]];
         if (!(r === 0 && g === 0 && b === 0 && a === 0)) {
           imageBox.left = i;
           break;
         }
       }
-      for (let i = width; i > 0; i -= 1) {
-        const [r, g, b, a] = ctx.getImageData(i, height / 2, 1, 1).data;
+      if (imageBox.left === undefined) {
+        throw new Error("Failed to render canvas")
+      }
+      for (let i = width; i > width /2; i -= 1) {
+        const [r,g,b,a] = [data[(i * 4) + 0],data[(i * 4) + 3],data[(i * 4) + 3],data[(i * 4) + 3]];
         if (!(r === 0 && g === 0 && b === 0 && a === 0)) {
           imageBox.right = i;
           break;
         }
       }
-      for (let i = 0; i < height; i += 1) {
-        const [r, g, b, a] = ctx.getImageData(width / 2, i, 1, 1).data;
+      if (imageBox.right === undefined) {
+        throw new Error("Failed to render canvas")
+      }
+      data = ctx.getImageData(width / 2, 0, 1, height).data;
+      for (let i = 0; i < height / 2; i += 1) {
+        const [r,g,b,a] = [data[(i * 4) + 0],data[(i * 4) + 3],data[(i * 4) + 3],data[(i * 4) + 3]];
         if (!(r === 0 && g === 0 && b === 0 && a === 0)) {
           imageBox.top = i;
           break;
         }
       }
-      for (let i = height; i > 0; i -= 1) {
-        const [r, g, b, a] = ctx.getImageData(width / 2, i, 1, 1).data;
+      if (imageBox.top === undefined) {
+        throw new Error("Failed to render canvas")
+      }
+      for (let i = height; i > height / 2; i -= 1) {
+        const [r,g,b,a] = [data[(i * 4) + 0],data[(i * 4) + 3],data[(i * 4) + 3],data[(i * 4) + 3]];
         if (!(r === 0 && g === 0 && b === 0 && a === 0)) {
           imageBox.bottom = i;
           break;
         }
+      }
+      if (imageBox.bottom === undefined) {
+        throw new Error("Failed to render canvas")
       }
 
       const newWidth = (imageBox.right - imageBox.left) + 1;
@@ -165,7 +180,7 @@ function getScript() {
 async function render({ input, output, style }) {
   const stylesheet = loadStylesheet(style, { style: 'compact' });
   const scripts = loadScripts([
-    'node_modules/html2canvas/dist/html2canvas.min.js',
+    'node_modules/html2canvas/dist/html2canvas.js',
   ]);
   const entries = [];
   for await (const entry of walkdir(input)) {
