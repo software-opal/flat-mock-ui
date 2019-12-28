@@ -48,17 +48,17 @@ function renderPug(filename, options = {}) {
 }
 
 function script() {
-  function renderElement(e) {
-    console.log(e);
+  function renderElement(e, _padding) {
+    const padding = { width: 0, height: 0, ...(_padding || {}) };
+    console.log(padding);
     const scale = 4;
     // html2canvas seems to offset
-    const padding = 248 / 4 + 10;
     const elmWidth = e.offsetWidth;
     const elmHeight = e.offsetHeight;
     return html2canvas(e, {
       scale,
-      width: elmWidth + (padding),
-      height: elmHeight + (padding),
+      width: elmWidth + padding.width,
+      height: elmHeight + padding.height,
       backgroundColor: 'rgba(0,0,0,0)',
     }).then((canvas) => {
       const { width, height } = canvas;
@@ -68,63 +68,102 @@ function script() {
 
       let { data } = ctx.getImageData(0, height / 2, width, 1);
       for (let i = 0; i < width / 2; i += 1) {
-        const [r, g, b, a] = [data[(i * 4) + 0], data[(i * 4) + 3], data[(i * 4) + 3], data[(i * 4) + 3]];
+        const [r, g, b, a] = [
+          data[(i * 4) + 0], data[(i * 4) + 3], data[(i * 4) + 3], data[(i * 4) + 3],
+        ];
         if (!(r === 0 && g === 0 && b === 0 && a === 0)) {
           imageBox.left = i;
           break;
         }
       }
-      if (imageBox.left === undefined) {
-        throw new Error('Failed to render canvas');
-      }
-      for (let i = width - 1; i > width / 2; i -= 1) {
-        const [r, g, b, a] = [data[(i * 4) + 0], data[(i * 4) + 3], data[(i * 4) + 3], data[(i * 4) + 3]];
-        if (!(r === 0 && g === 0 && b === 0 && a === 0)) {
-          imageBox.right = i;
-          break;
+      if (imageBox.left !== undefined) {
+        for (let i = width - 1; i > width / 2; i -= 1) {
+          const [r, g, b, a] = [
+            data[(i * 4) + 0], data[(i * 4) + 3], data[(i * 4) + 3], data[(i * 4) + 3]];
+          if (!(r === 0 && g === 0 && b === 0 && a === 0)) {
+            imageBox.right = i;
+            break;
+          }
         }
-      }
-      if (imageBox.right === undefined) {
-        throw new Error('Failed to render canvas');
-      }
-      data = ctx.getImageData(width / 2, 0, 1, height).data;
-      for (let i = 0; i < height / 2; i += 1) {
-        const [r, g, b, a] = [data[(i * 4) + 0], data[(i * 4) + 3], data[(i * 4) + 3], data[(i * 4) + 3]];
-        if (!(r === 0 && g === 0 && b === 0 && a === 0)) {
-          imageBox.top = i;
-          break;
-        }
-      }
-      if (imageBox.top === undefined) {
-        throw new Error('Failed to render canvas');
-      }
-      for (let i = height - 1; i > height / 2; i -= 1) {
-        const [r, g, b, a] = [data[(i * 4) + 0], data[(i * 4) + 3], data[(i * 4) + 3], data[(i * 4) + 3]];
-        if (!(r === 0 && g === 0 && b === 0 && a === 0)) {
-          imageBox.bottom = i;
-          break;
+        if (imageBox.right !== undefined) {
+          data = ctx.getImageData(width / 2, 0, 1, height).data;
+          for (let i = 0; i < height / 2; i += 1) {
+            const [r, g, b, a] = [
+              data[(i * 4) + 0], data[(i * 4) + 3], data[(i * 4) + 3], data[(i * 4) + 3]];
+            if (!(r === 0 && g === 0 && b === 0 && a === 0)) {
+              imageBox.top = i;
+              break;
+            }
+          }
+          if (imageBox.top === undefined) {
+            throw new Error('Failed to render canvas');
+          }
+          for (let i = height - 1; i > height / 2; i -= 1) {
+            const [r, g, b, a] = [
+              data[(i * 4) + 0], data[(i * 4) + 3], data[(i * 4) + 3], data[(i * 4) + 3]];
+            if (!(r === 0 && g === 0 && b === 0 && a === 0)) {
+              imageBox.bottom = i;
+              break;
+            }
+          }
         }
       }
       if (imageBox.bottom === undefined) {
-        throw new Error('Failed to render canvas');
+        if ((padding.count || 0) >= 20) {
+          throw new Error('Failed to render canvas');
+        } else {
+          return renderElement(e, {
+            width: padding.width + elmWidth,
+            height: padding.height + elmHeight,
+            count: (padding.count || 0) + 2,
+          });
+        }
       }
       const newWidth = (imageBox.right - imageBox.left) + 1;
       const newHeight = (imageBox.bottom - imageBox.top) + 1;
+      const expWidth = (elmWidth * scale);
+      const expHeight = (elmHeight * scale);
+      console.log(imageBox, {
+        newWidth, elmWidth, newHeight, elmHeight, expWidth, expHeight,
+      });
       if (!(newWidth === (elmWidth * scale) && newHeight === (elmHeight * scale))) {
         const lines = [];
-        if (imageBox.left == 0) {
+        let { width: newPadWidth, height: newPadHeight } = padding;
+        if (imageBox.left === 0) {
           lines.push('Possible loss of image data(left)');
+          newPadWidth += 10;
         }
-        if (imageBox.right == width - 1) {
+        if (imageBox.right === width - 1) {
           lines.push('Possible loss of image data(right)');
+          newPadWidth += Math.max(10, Math.ceil(((imageBox.left + expWidth) - imageBox.right) / scale));
         }
-        if (imageBox.top == 0) {
+        if (imageBox.top === 0) {
           lines.push('Possible loss of image data(top)');
+          newPadHeight += 10;
         }
-        if (imageBox.bottom == height - 1) {
+        if (imageBox.bottom === height - 1) {
           lines.push('Possible loss of image data(bottom)');
+          newPadHeight += Math.max(10, Math.ceil(((imageBox.top + expHeight) - imageBox.bottom) / scale));
         }
-        throw new Error(`Generated image was the wrong size: ${lines.join('\n')}`);
+        if (padding.width === newPadWidth && padding.height === newPadHeight) {
+          lines.push(
+            'Cannot determine side of image loss. '
+           + `(${newWidth}, ${newHeight}) !== (${(elmWidth * scale)}, ${(elmHeight * scale)})`,
+          );
+          newPadWidth += 10;
+          newPadHeight += 10;
+        }
+        console.log(`Generated image was the wrong size: ${lines.join('\n')}`);
+        if ((padding.count || 0) >= 20) {
+          // throw new Error(`Generated image was the wrong size: ${lines.join('\n')}`);
+        } else {
+          ctx.clearRect(0, 0, width, height);
+          return renderElement(e, {
+            width: newPadWidth,
+            height: newPadHeight,
+            count: (padding.count || 0) + 1,
+          });
+        }
       }
 
       const imageData = ctx.getImageData(imageBox.left, imageBox.top, newWidth, newHeight);
@@ -210,8 +249,8 @@ async function render({ input, output, style }) {
       throw { error: e, filename: entry };
     }
   }
-  const tableRows = entries.map(([filename, data], i) => {
-    filename = filename.replace(/\\/g, '/');
+  const tableRows = entries.map(([_filename, data], i) => {
+    const filename = _filename.replace(/\\/g, '/');
     const name = filename.replace(/\\\//g, '_').replace('.pug', '').replace(/[^-_a-zA-Z0-9]/g, '_');
     const id = `${i}__${name}`;
     return `
@@ -265,11 +304,10 @@ async function render({ input, output, style }) {
   await fs.writeFile(output, outputHtml);
 }
 
-
 Promise.all([
-  Promise.all(['newsletter', 'sub', 'wgea'].map((input) => render({
+  Promise.all(['newsletter/1-first-last', 'newsletter/2-greeting', 'newsletter/3-email-validation', 'sub', 'wgea'].map((input) => render({
     input: `views/${input}`,
-    output: `renders-${input}.html`,
+    output: `renders-${input.replace(/[\\/]/g, '-')}.html`,
     style: 'style.scss',
   }))),
   render({
