@@ -27,6 +27,10 @@ $bg: #2a3990;
     padding: 0;
     margin: 0;
   }
+  &.large {
+    max-width: 800px;
+    width: 800px;
+  }
 }
 
 .form {
@@ -93,16 +97,16 @@ $bg: #2a3990;
       border: solid red 2px;
     }
   }
-  .radio-group {
+  .radio-group, .check-group {
     display: flex;
     flex-direction: row;
     margin-left: 5px;
     margin-bottom: 5px;
-    &.radio-vertical {
+    &.radio-vertical, &.check-vertical {
       flex-direction: column;
     }
 
-    .radio {
+    .radio, .check {
       margin: 5px;
       margin-right: 1em;
       margin-bottom: 0;
@@ -113,7 +117,6 @@ $bg: #2a3990;
         width: 0.8em;
         height: 0.8em;
         background: rgba(255,255,255,0.3);
-        border-radius: 50%;
         display: inline-block;
         vertical-align: baseline;
       }
@@ -121,6 +124,12 @@ $bg: #2a3990;
         background: rgba(255,255,255,0.1);
         border: 0.2em solid rgba(255,255,255,0.2);
       }
+    }
+    .radio::before {
+      border-radius: 50%;
+    }
+    .check::before {
+      border-radius: 10%;
     }
   }
 }

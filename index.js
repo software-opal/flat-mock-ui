@@ -305,7 +305,7 @@ async function render({ input, output, style }) {
 }
 
 Promise.all([
-  Promise.all(['newsletter/1-first-last', 'newsletter/2-greeting', 'newsletter/3-email-validation', 'sub', 'wgea', 'names'].map((input) => render({
+  Promise.all(['newsletter/1-first-last', 'newsletter/2-greeting', 'newsletter/3-email-validation', 'sub', 'wgea', 'names', 'full-name', 'email', 'gender'].map((input) => render({
     input: `views/${input}`,
     output: `renders-${input.replace(/[\\/]/g, '-')}.html`,
     style: 'style.scss',
