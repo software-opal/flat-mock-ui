@@ -12,10 +12,13 @@ $bg: #2a3990;
   color: white;
   display: flex;
   flex-direction: column;
-  font-size: 28px;
+  font-size: 36px;
   font-weight: normal;
   padding: 10px;
   text-align: left;
+
+  max-width: 500px;
+  width: 500px;
 
   hr {
     width: 100%;
@@ -27,7 +30,17 @@ $bg: #2a3990;
 }
 
 .form {
-  width: 1920px * 1 / 3;
+
+  .required {
+    display: inline-block;
+    font-size: 80%;
+    color: red;
+    vertical-align: top;
+
+      &::before {
+        content: "*";
+      }
+  }
 
   .group {
     display: flex;
@@ -113,7 +126,6 @@ $bg: #2a3990;
 }
 
 .email {
-  max-width: 1920px * 1 / 3;
 
   .line {
     display: flex;
