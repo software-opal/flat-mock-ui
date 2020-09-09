@@ -16,7 +16,7 @@
     "canvas2svg": "^1.0.16",
     "html2canvas": "^1.0.0-rc.5",
     "jsdom": "^15.2.1",
-    "node-sass": "^4.13.0",
+    "node-sass": "^4.13.1",
     "pug": "^2.0.4"
   },
   "devDependencies": {
